@@ -16,6 +16,30 @@ constexpr PCWSTR ISLAND_ENVIRONMENT_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A
 // So that we can use SetWindowHookEx to inject the DLL into the game
 ISLAND_API HRESULT WINAPI IslandGetWindowHook(_Out_ HOOKPROC* pHookProc);
 
+static VOID DisableVirtualMemoryProtect() {
+    HMODULE ntdll = GetModuleHandleA("ntdll.dll");
+    if (!ntdll)
+    {
+        return;
+    }
+
+    FARPROC pNtProtectVirtualMemory = GetProcAddress(ntdll, "NtProtectVirtualMemory");
+    FARPROC pNtQuerySection = GetProcAddress(ntdll, "NtQuerySection");
+
+    DWORD old;
+    VirtualProtect(pNtProtectVirtualMemory, 1, PAGE_EXECUTE_READWRITE, &old);
+    *(PUINT64)pNtProtectVirtualMemory = *(PUINT64)pNtQuerySection & ~(0xFFUi64 << 32) | (UINT64)(*(PUINT32)((UINT64)pNtQuerySection + 4) - 1) << 32;
+    VirtualProtect(pNtProtectVirtualMemory, 1, old, &old);
+}
+
+static bool IsValidReadPtr(LPVOID ptr, SIZE_T size) {
+    MEMORY_BASIC_INFORMATION mbi;
+    if (VirtualQuery(ptr, &mbi, sizeof(mbi))) {
+        return (mbi.Protect & PAGE_READWRITE) || (mbi.Protect & PAGE_READONLY);
+    }
+    return false;
+}
+
 namespace Snap
 {
     namespace Hutao
@@ -27,11 +51,14 @@ namespace Snap
 
             enum struct IslandState;
 
+            struct FunctionOffsets;
             struct IslandEnvironment;
             struct IslandStaging;
+
+            static VOID InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment);
         }
     }
-}
+};
 
 enum struct Snap::Hutao::UnlockerIsland::IslandState : int
 {
@@ -41,29 +68,35 @@ enum struct Snap::Hutao::UnlockerIsland::IslandState : int
     Stopped = 3,
 };
 
+struct Snap::Hutao::UnlockerIsland::FunctionOffsets
+{
+    UINT32 MickeyWonderMethod;
+    UINT32 MickeyWonderMethodPartner;
+    UINT32 MickeyWonderMethodPartner2;
+    UINT32 SetFieldOfView;
+    UINT32 SetEnableFogRendering;
+    UINT32 SetTargetFrameRate;
+    UINT32 OpenTeam;
+    UINT32 OpenTeamPageAccordingly;
+};
+
 struct Snap::Hutao::UnlockerIsland::IslandEnvironment
 {
     enum IslandState State;
     DWORD LastError;
 
+    FunctionOffsets FunctionOffsets;
+
+    bool HookingSetFieldOfView;
+    bool EnableSetFieldOfView;
+    bool FixLowFovScene;
+    bool DisableFog;
     FLOAT FieldOfView;
     INT32 TargetFrameRate;
-    bool DisableFog;
-    bool FixLowFovScene;
+    bool HookingOpenTeam;
     bool RemoveOpenTeamProgress;
-    bool LoopAdjustFpsOnly;
-
-    UINT32 FunctionOffsetMickeyWonderMethod;
-    UINT32 FunctionOffsetMickeyWonderMethodPartner;
-    UINT32 FunctionOffsetMickeyWonderMethodPartner2;
-    UINT32 FunctionOffsetSetFieldOfView;
-    UINT32 FunctionOffsetSetEnableFogRendering;
-    UINT32 FunctionOffsetSetTargetFrameRate;
-    UINT32 FunctionOffsetOpenTeam;
-    UINT32 FunctionOffsetOpenTeamPageAccordingly;
-
-    FLOAT DebugOriginalFieldOfView;
-    INT32 DebugOpenTeamCount;
+    bool HookingMickeyWonderPartner2;
+    bool Reserved;
 };
 
 typedef struct Il2CppObject
@@ -108,12 +141,21 @@ struct Snap::Hutao::UnlockerIsland::IslandStaging
     OpenTeamPageAccordinglyFunc OpenTeamPageAccordingly;
 };
 
-bool IsValidReadPtr(LPVOID ptr, SIZE_T size) {
-    MEMORY_BASIC_INFORMATION mbi;
-    if (VirtualQuery(ptr, &mbi, sizeof(mbi))) {
-        return (mbi.Protect & PAGE_READWRITE) || (mbi.Protect & PAGE_READONLY);
-    }
-    return false;
+static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
+{
+    // Magic
+    staging.MickeyWonder = reinterpret_cast<MickeyWonderMethod>(base + pEnvironment->FunctionOffsets.MickeyWonderMethod);
+    staging.MickeyWonderPartner = reinterpret_cast<MickeyWonderMethodPartner>(base + pEnvironment->FunctionOffsets.MickeyWonderMethodPartner);
+    staging.MickeyWonderPartner2 = reinterpret_cast<MickeyWonderMethodPartner2>(base + pEnvironment->FunctionOffsets.MickeyWonderMethodPartner2);
+
+    // Basic functions
+    staging.SetFieldOfView = reinterpret_cast<SetFieldOfViewFunc>(base + pEnvironment->FunctionOffsets.SetFieldOfView);
+    staging.SetEnableFogRendering = reinterpret_cast<SetEnableFogRenderingFunc>(base + pEnvironment->FunctionOffsets.SetEnableFogRendering);
+    staging.SetTargetFrameRate = reinterpret_cast<SetTargetFrameRateFunc>(base + pEnvironment->FunctionOffsets.SetTargetFrameRate);
+
+    // Team functions
+    staging.OpenTeam = reinterpret_cast<OpenTeamFunc>(base + pEnvironment->FunctionOffsets.OpenTeam);
+    staging.OpenTeamPageAccordingly = reinterpret_cast<OpenTeamPageAccordinglyFunc>(base + pEnvironment->FunctionOffsets.OpenTeamPageAccordingly);
 }
 
 inline void LogA(const char* format, ...)

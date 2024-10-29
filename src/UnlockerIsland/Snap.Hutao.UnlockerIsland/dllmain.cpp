@@ -38,8 +38,13 @@ static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spe
 
 static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
 {
+    if (!pEnvironment->EnableSetFieldOfView)
+    {
+        return staging.SetFieldOfView(pThis, value);
+    }
+
     value = std::floor(value);
-    pEnvironment->DebugOriginalFieldOfView = value;
+    LogA("Original FOV: %.2f\n", value);
 
     staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
     if (value <= 30.0f)
@@ -56,7 +61,6 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
 
 static VOID OpenTeamEndpoint()
 {
-    pEnvironment->DebugOpenTeamCount++;
     if (pEnvironment->RemoveOpenTeamProgress)
     {
         staging.OpenTeamPageAccordingly(false);
@@ -65,39 +69,6 @@ static VOID OpenTeamEndpoint()
     {
         staging.OpenTeam();
     }
-}
-
-static VOID InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
-{
-    // Magic
-    staging.MickeyWonder = reinterpret_cast<MickeyWonderMethod>(base + pEnvironment->FunctionOffsetMickeyWonderMethod);
-    staging.MickeyWonderPartner = reinterpret_cast<MickeyWonderMethodPartner>(base + pEnvironment->FunctionOffsetMickeyWonderMethodPartner);
-    staging.MickeyWonderPartner2 = reinterpret_cast<MickeyWonderMethodPartner2>(base + pEnvironment->FunctionOffsetMickeyWonderMethodPartner2);
-
-    // Basic functions
-    staging.SetFieldOfView = reinterpret_cast<SetFieldOfViewFunc>(base + pEnvironment->FunctionOffsetSetFieldOfView);
-    staging.SetEnableFogRendering = reinterpret_cast<SetEnableFogRenderingFunc>(base + pEnvironment->FunctionOffsetSetEnableFogRendering);
-    staging.SetTargetFrameRate = reinterpret_cast<SetTargetFrameRateFunc>(base + pEnvironment->FunctionOffsetSetTargetFrameRate);
-
-    // Team functions
-    staging.OpenTeam = reinterpret_cast<OpenTeamFunc>(base + pEnvironment->FunctionOffsetOpenTeam);
-    staging.OpenTeamPageAccordingly = reinterpret_cast<OpenTeamPageAccordinglyFunc>(base + pEnvironment->FunctionOffsetOpenTeamPageAccordingly);
-}
-
-static VOID DisableVirtualMemoryProtect() {
-    HMODULE ntdll = GetModuleHandleA("ntdll.dll");
-    if (!ntdll)
-    {
-        return;
-    }
-
-    FARPROC pNtProtectVirtualMemory = GetProcAddress(ntdll, "NtProtectVirtualMemory");
-    FARPROC pNtQuerySection = GetProcAddress(ntdll, "NtQuerySection");
-
-    DWORD old;
-    VirtualProtect(pNtProtectVirtualMemory, 1, PAGE_EXECUTE_READWRITE, &old);
-    *(PUINT64)pNtProtectVirtualMemory = *(PUINT64)pNtQuerySection & ~(0xFFUi64 << 32) | (UINT64)(*(PUINT32)((UINT64)pNtQuerySection + 4) - 1) << 32;
-    VirtualProtect(pNtProtectVirtualMemory, 1, old, &old);
 }
 
 static DWORD WINAPI IslandThread(LPVOID lpParam)
@@ -126,7 +97,7 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
     UINT64 base = (UINT64)GetModuleHandleW(NULL);
     InitializeIslandStaging(staging, base, pEnvironment);
 
-    if (pEnvironment->LoopAdjustFpsOnly)
+    if (!pEnvironment->HookingSetFieldOfView)
     {
         while (true)
         {
@@ -142,9 +113,17 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
             minnie += std::string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
         }
 
-        Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
+        if (pEnvironment->HookingMickeyWonderPartner2)
+        {
+            Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
+        }
+
+        if (pEnvironment->HookingOpenTeam)
+        {
+            Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
+        }
+        
         Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
-        Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
 
         WaitForSingleObject(GetCurrentThread(), INFINITE);
     }
