@@ -1,0 +1,137 @@
+﻿#pragma once
+
+#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
+// Windows 头文件
+#include <windows.h>
+#include <wil/resource.h>
+
+#define ISLAND_API EXTERN_C __declspec(dllexport)
+
+// Feature switch
+constexpr auto ISLAND_FEATURE_HANDLE_DLL_PROCESS_DETACH = true;
+
+constexpr PCWSTR ISLAND_ENVIRONMENT_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
+
+// This function is only meant to get an arbitrary function pointer from the DLL
+// So that we can use SetWindowHookEx to inject the DLL into the game
+ISLAND_API HRESULT WINAPI IslandGetWindowHook(_Out_ HOOKPROC* pHookProc);
+
+namespace Snap
+{
+    namespace Hutao
+    {
+        namespace UnlockerIsland
+        {
+            using UNIQUE_HANDLE = wil::unique_any<HANDLE, decltype(&CloseHandle), CloseHandle>;
+            using UNIQUE_VIEW_OF_FILE = wil::unique_any<LPVOID, decltype(&UnmapViewOfFile), UnmapViewOfFile>;
+
+            enum struct IslandState;
+
+            struct IslandEnvironment;
+            struct IslandStaging;
+        }
+    }
+}
+
+enum struct Snap::Hutao::UnlockerIsland::IslandState : int
+{
+    None = 0,
+    Error = 1,
+    Started = 2,
+    Stopped = 3,
+};
+
+struct Snap::Hutao::UnlockerIsland::IslandEnvironment
+{
+    enum IslandState State;
+    DWORD LastError;
+
+    FLOAT FieldOfView;
+    INT32 TargetFrameRate;
+    bool DisableFog;
+    bool FixLowFovScene;
+    bool RemoveOpenTeamProgress;
+    bool LoopAdjustFpsOnly;
+
+    UINT32 FunctionOffsetMickeyWonderMethod;
+    UINT32 FunctionOffsetMickeyWonderMethodPartner;
+    UINT32 FunctionOffsetMickeyWonderMethodPartner2;
+    UINT32 FunctionOffsetSetFieldOfView;
+    UINT32 FunctionOffsetSetEnableFogRendering;
+    UINT32 FunctionOffsetSetTargetFrameRate;
+    UINT32 FunctionOffsetOpenTeam;
+    UINT32 FunctionOffsetOpenTeamPageAccordingly;
+
+    FLOAT DebugOriginalFieldOfView;
+    INT32 DebugOpenTeamCount;
+};
+
+typedef struct Il2CppObject
+{
+    void* klass;
+    void* monitor;
+} Il2CppObject;
+
+typedef struct Il2CppArraySize
+{
+    Il2CppObject object;
+    void* bounds;
+    SIZE_T max_length;
+    UCHAR vector[32];
+} Il2CppArraySize;
+
+typedef struct Il2CppString
+{
+    Il2CppObject object;
+    INT32 length;
+    WCHAR chars[32];
+} Il2CppString;
+
+typedef Il2CppArraySize* (*MickeyWonderMethod)(INT32 value);
+typedef Il2CppString* (*MickeyWonderMethodPartner)(PCSTR value);
+typedef VOID (*MickeyWonderMethodPartner2)(LPVOID mickey, LPVOID house, LPVOID spell);
+typedef VOID (*SetFieldOfViewFunc)(LPVOID this__, FLOAT value);
+typedef VOID (*SetEnableFogRenderingFunc)(bool value);
+typedef VOID (*SetTargetFrameRateFunc)(INT32 value);
+typedef VOID (*OpenTeamFunc)();
+typedef VOID (*OpenTeamPageAccordinglyFunc)(bool value);
+
+struct Snap::Hutao::UnlockerIsland::IslandStaging
+{
+    MickeyWonderMethod MickeyWonder;
+    MickeyWonderMethodPartner MickeyWonderPartner;
+    MickeyWonderMethodPartner2 MickeyWonderPartner2;
+    SetFieldOfViewFunc SetFieldOfView;
+    SetEnableFogRenderingFunc SetEnableFogRendering;
+    SetTargetFrameRateFunc SetTargetFrameRate;
+    OpenTeamFunc OpenTeam;
+    OpenTeamPageAccordinglyFunc OpenTeamPageAccordingly;
+};
+
+bool IsValidReadPtr(LPVOID ptr, SIZE_T size) {
+    MEMORY_BASIC_INFORMATION mbi;
+    if (VirtualQuery(ptr, &mbi, sizeof(mbi))) {
+        return (mbi.Protect & PAGE_READWRITE) || (mbi.Protect & PAGE_READONLY);
+    }
+    return false;
+}
+
+inline void LogA(const char* format, ...)
+{
+#ifdef _DEBUG
+    va_list args;
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
+#endif
+}
+
+inline void LogW(const WCHAR* format, ...)
+{
+#ifdef _DEBUG
+    va_list args;
+    va_start(args, format);
+    vfwprintf(stdout, format, args);
+    va_end(args);
+#endif
+}
