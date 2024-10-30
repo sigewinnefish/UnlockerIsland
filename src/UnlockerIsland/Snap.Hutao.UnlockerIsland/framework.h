@@ -16,7 +16,8 @@ constexpr PCWSTR ISLAND_ENVIRONMENT_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A
 // So that we can use SetWindowHookEx to inject the DLL into the game
 ISLAND_API HRESULT WINAPI IslandGetWindowHook(_Out_ HOOKPROC* pHookProc);
 
-static VOID DisableVirtualMemoryProtect() {
+static VOID DisableVirtualMemoryProtect()
+{
     HMODULE ntdll = GetModuleHandleA("ntdll.dll");
     if (!ntdll)
     {
@@ -32,7 +33,8 @@ static VOID DisableVirtualMemoryProtect() {
     VirtualProtect(pNtProtectVirtualMemory, 1, old, &old);
 }
 
-static bool IsValidReadPtr(LPVOID ptr, SIZE_T size) {
+static bool IsValidReadPtr(LPVOID ptr, SIZE_T size)
+{
     MEMORY_BASIC_INFORMATION mbi;
     if (VirtualQuery(ptr, &mbi, sizeof(mbi))) {
         return (mbi.Protect & PAGE_READWRITE) || (mbi.Protect & PAGE_READONLY);
@@ -87,16 +89,16 @@ struct Snap::Hutao::UnlockerIsland::IslandEnvironment
 
     FunctionOffsets FunctionOffsets;
 
-    bool HookingSetFieldOfView;
-    bool EnableSetFieldOfView;
-    bool FixLowFovScene;
-    bool DisableFog;
+    BOOL HookingSetFieldOfView;
+    BOOL EnableSetFieldOfView;
     FLOAT FieldOfView;
+    BOOL FixLowFovScene;
+    BOOL DisableFog;
+    BOOL EnableSetTargetFrameRate;
     INT32 TargetFrameRate;
-    bool HookingOpenTeam;
-    bool RemoveOpenTeamProgress;
-    bool HookingMickeyWonderPartner2;
-    bool Reserved;
+    BOOL HookingOpenTeam;
+    BOOL RemoveOpenTeamProgress;
+    BOOL HookingMickeyWonderPartner2;
 };
 
 typedef struct Il2CppObject

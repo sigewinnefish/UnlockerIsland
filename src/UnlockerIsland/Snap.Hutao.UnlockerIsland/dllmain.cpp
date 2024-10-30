@@ -46,7 +46,11 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
     value = std::floor(value);
     LogA("Original FOV: %.2f\n", value);
 
-    staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
+    if (pEnvironment->EnableSetTargetFrameRate)
+    {
+        staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
+    }
+
     if (value <= 30.0f)
     {
         staging.SetEnableFogRendering(false);
@@ -101,7 +105,12 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
     {
         while (true)
         {
-            staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
+            // Not so meaningful, but we allow the user to change the settings
+            if (pEnvironment->EnableSetTargetFrameRate)
+            {
+                staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
+            }
+
             Sleep(62);
         }
     }
