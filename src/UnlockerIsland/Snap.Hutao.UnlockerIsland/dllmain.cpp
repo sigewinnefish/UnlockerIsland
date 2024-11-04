@@ -117,7 +117,28 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
     UINT64 base = (UINT64)GetModuleHandleW(NULL);
     InitializeIslandStaging(staging, base, pEnvironment);
 
-    if (!pEnvironment->HookingSetFieldOfView)
+    if (pEnvironment->HookingMickeyWonderPartner2)
+    {
+        for (INT32 n = 0; n < 3; n++)
+        {
+            Il2CppArraySize* const result = staging.MickeyWonder(n);
+            minnie += std::string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
+        }
+
+        Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
+    }
+
+    if (pEnvironment->HookingOpenTeam)
+    {
+        Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
+    }
+
+    if (pEnvironment->HookingSetFieldOfView)
+    {
+        Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
+        WaitForSingleObject(GetCurrentThread(), INFINITE);
+    }
+    else
     {
         while (true)
         {
@@ -129,28 +150,6 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
 
             Sleep(62);
         }
-    }
-    else
-    {
-        for (INT32 n = 0; n < 3; n++)
-        {
-            Il2CppArraySize* const result = staging.MickeyWonder(n);
-            minnie += std::string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
-        }
-
-        if (pEnvironment->HookingMickeyWonderPartner2)
-        {
-            Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
-        }
-
-        if (pEnvironment->HookingOpenTeam)
-        {
-            Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
-        }
-        
-        Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
-
-        WaitForSingleObject(GetCurrentThread(), INFINITE);
     }
 
     pEnvironment->State = IslandState::Stopped;
