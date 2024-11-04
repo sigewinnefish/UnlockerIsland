@@ -18,9 +18,9 @@ static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spe
 
     Il2CppString* pString = staging.MickeyWonderPartner(minnie.c_str());
     Il2CppString** ppCurrent = NULL;
-    for (int i = 0x10; i < 0x233; i += 0x8)
+    for (int offset = 0x10; offset < 0x233; offset += 0x8)
     {
-        ppCurrent = (Il2CppString**)((PBYTE)house + i);
+        ppCurrent = (Il2CppString**)((PBYTE)house + offset);
         if (*ppCurrent == NULL || !IsValidReadPtr(*ppCurrent, sizeof(Il2CppString)))
         {
             continue;
@@ -32,7 +32,7 @@ static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spe
         }
 
         bFound = TRUE;
-        LogA("Minnie at 0x%x\n", i);
+        LogA("Minnie at 0x%x\n", offset);
         break;
     }
 
