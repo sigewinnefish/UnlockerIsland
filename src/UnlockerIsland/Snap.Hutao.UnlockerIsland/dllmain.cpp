@@ -15,11 +15,17 @@ struct IslandStaging staging {};
 static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spell)
 {
     Il2CppString* pString = staging.MickeyWonderPartner(minnie.c_str());
-    Il2CppString** ppCurrent = (Il2CppString**)((PBYTE)house + 0x90);
+    Il2CppString** ppCurrent = (Il2CppString**)((PBYTE)house + 0x68 /* 0x90 for Miqi */);
 
     if (*ppCurrent == NULL || !IsValidReadPtr(*ppCurrent, sizeof(Il2CppString)))
     {
         LogA("There is no mouse.\n");
+        return staging.MickeyWonderPartner2(mickey, house, spell);
+    }
+
+    if ((*ppCurrent)->length != 66)
+    {
+        LogA("The mouse is not Minnie.\n");
         return staging.MickeyWonderPartner2(mickey, house, spell);
     }
 
@@ -28,10 +34,7 @@ static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spe
     LogA("String class: %p\n", pString->object.klass);
     LogW(L"String Minnie: %s\n", &pString->chars[0]);
 
-    if ((*ppCurrent)->object.klass == pString->object.klass)
-    {
-        *ppCurrent = pString;
-    }
+    *ppCurrent = pString;
 
     staging.MickeyWonderPartner2(mickey, house, spell);
 }
