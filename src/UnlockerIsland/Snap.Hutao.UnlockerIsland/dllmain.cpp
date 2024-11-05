@@ -58,8 +58,7 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
     {
         return staging.SetFieldOfView(pThis, value);
     }
-
-    value = std::floor(value);
+    
     LogA("Original FOV: %.2f\n", value);
 
     if (pEnvironment->EnableSetTargetFrameRate)
@@ -67,7 +66,7 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
         staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
     }
 
-    if (value <= 30.0f)
+    if (std::floor(value) <= 30.0f)
     {
         staging.SetEnableFogRendering(false);
         staging.SetFieldOfView(pThis, pEnvironment->FixLowFovScene ? value : pEnvironment->FieldOfView);
