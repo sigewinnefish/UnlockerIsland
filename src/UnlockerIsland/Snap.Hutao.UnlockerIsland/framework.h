@@ -103,14 +103,14 @@ struct Snap::Hutao::UnlockerIsland::IslandEnvironment
 
 typedef struct Il2CppObject
 {
-    void* klass;
-    void* monitor;
+    LPVOID klass;
+    LPVOID monitor;
 } Il2CppObject;
 
 typedef struct Il2CppArraySize
 {
     Il2CppObject object;
-    void* bounds;
+    LPVOID bounds;
     SIZE_T max_length;
     UCHAR vector[32];
 } Il2CppArraySize;
