@@ -80,6 +80,7 @@ struct Snap::Hutao::UnlockerIsland::FunctionOffsets
     UINT32 SetTargetFrameRate;
     UINT32 OpenTeam;
     UINT32 OpenTeamPageAccordingly;
+    UINT32 CheckCanEnter;
 };
 
 struct Snap::Hutao::UnlockerIsland::IslandEnvironment
@@ -130,6 +131,7 @@ typedef VOID (*SetEnableFogRenderingFunc)(bool value);
 typedef VOID (*SetTargetFrameRateFunc)(INT32 value);
 typedef VOID (*OpenTeamFunc)();
 typedef VOID (*OpenTeamPageAccordinglyFunc)(bool value);
+typedef bool (*CheckCanEnterFunc)();
 
 struct Snap::Hutao::UnlockerIsland::IslandStaging
 {
@@ -141,6 +143,7 @@ struct Snap::Hutao::UnlockerIsland::IslandStaging
     SetTargetFrameRateFunc SetTargetFrameRate;
     OpenTeamFunc OpenTeam;
     OpenTeamPageAccordinglyFunc OpenTeamPageAccordingly;
+    CheckCanEnterFunc CheckCanEnter;
 };
 
 static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
@@ -158,6 +161,7 @@ static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& 
     // Team functions
     staging.OpenTeam = reinterpret_cast<OpenTeamFunc>(base + pEnvironment->FunctionOffsets.OpenTeam);
     staging.OpenTeamPageAccordingly = reinterpret_cast<OpenTeamPageAccordinglyFunc>(base + pEnvironment->FunctionOffsets.OpenTeamPageAccordingly);
+    staging.CheckCanEnter = reinterpret_cast<CheckCanEnterFunc>(base + pEnvironment->FunctionOffsets.CheckCanEnter);
 }
 
 inline void LogA(const char* format, ...)

@@ -9,7 +9,7 @@ BOOL bDllExit = FALSE;
 
 std::string minnie;
 
-struct IslandEnvironment* pEnvironment = NULL;
+struct Snap::Hutao::UnlockerIsland::IslandEnvironment* pEnvironment = NULL;
 struct IslandStaging staging {};
 
 static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spell)
@@ -80,7 +80,7 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
 
 static VOID OpenTeamEndpoint()
 {
-    if (pEnvironment->RemoveOpenTeamProgress)
+    if (pEnvironment->RemoveOpenTeamProgress && staging.CheckCanEnter())
     {
         staging.OpenTeamPageAccordingly(false);
     }
