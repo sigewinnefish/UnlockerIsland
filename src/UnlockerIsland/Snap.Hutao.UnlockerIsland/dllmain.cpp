@@ -58,8 +58,6 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
     {
         return staging.SetFieldOfView(pThis, value);
     }
-    
-    LogA("Original FOV: %.2f\n", value);
 
     if (pEnvironment->EnableSetTargetFrameRate)
     {
@@ -87,6 +85,24 @@ static VOID OpenTeamEndpoint()
     else
     {
         staging.OpenTeam();
+    }
+}
+
+static VOID SetupViewEndpoint(LPVOID pThis)
+{
+    LogA("SetupViewEndpoint called\n");
+    staging.SetupView(pThis);
+    if (pEnvironment->HideQuestBanner)
+    {
+        LogA("Hiding banner\n");
+        Il2CppString* bannerString = staging.MickeyWonderPartner("Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner");
+        LogA("BannerString at 0x%x\n", bannerString);
+        LPVOID banner = staging.FindGameObject(bannerString);
+        if (banner)
+        {
+            LogA("Banner found\n");
+            staging.SetActive(banner, false);
+        }
     }
 }
 
@@ -130,6 +146,11 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
     if (pEnvironment->HookingOpenTeam)
     {
         Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
+    }
+
+    if (pEnvironment->HookingSetupView)
+    {
+        Detours::Hook(&(LPVOID&)staging.SetupView, SetupViewEndpoint);
     }
 
     if (pEnvironment->HookingSetFieldOfView)
