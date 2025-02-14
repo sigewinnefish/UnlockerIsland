@@ -81,9 +81,7 @@ struct Snap::Hutao::UnlockerIsland::FunctionOffsets
     UINT32 OpenTeam;
     UINT32 OpenTeamPageAccordingly;
     UINT32 CheckCanEnter;
-    UINT32 SetupView;
-    UINT32 FindGameObject;
-    UINT32 SetActive;
+    UINT32 SetupQuestBanner;
 };
 
 struct Snap::Hutao::UnlockerIsland::IslandEnvironment
@@ -103,7 +101,7 @@ struct Snap::Hutao::UnlockerIsland::IslandEnvironment
     BOOL HookingOpenTeam;
     BOOL RemoveOpenTeamProgress;
     BOOL HookingMickeyWonderPartner2;
-    BOOL HookingSetupView;
+    BOOL HookingSetupQuestBanner;
     BOOL HideQuestBanner;
 };
 
@@ -137,9 +135,7 @@ typedef VOID (*SetTargetFrameRateFunc)(INT32 value);
 typedef VOID (*OpenTeamFunc)();
 typedef VOID (*OpenTeamPageAccordinglyFunc)(bool value);
 typedef bool (*CheckCanEnterFunc)();
-typedef VOID (*SetupViewFunc)(LPVOID this__);
-typedef LPVOID (*FindGameObjectFunc)(Il2CppString* name);
-typedef VOID (*SetActiveFunc)(LPVOID this__, bool value);
+typedef VOID (*SetupQuestBannerFunc)(LPVOID this__);
 
 struct Snap::Hutao::UnlockerIsland::IslandStaging
 {
@@ -152,9 +148,7 @@ struct Snap::Hutao::UnlockerIsland::IslandStaging
     OpenTeamFunc OpenTeam;
     OpenTeamPageAccordinglyFunc OpenTeamPageAccordingly;
     CheckCanEnterFunc CheckCanEnter;
-    SetupViewFunc SetupView;
-    FindGameObjectFunc FindGameObject;
-    SetActiveFunc SetActive;
+    SetupQuestBannerFunc SetupQuestBanner;
 };
 
 static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
@@ -175,9 +169,7 @@ static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& 
     staging.CheckCanEnter = reinterpret_cast<CheckCanEnterFunc>(base + pEnvironment->FunctionOffsets.CheckCanEnter);
 
     // Banner functions
-    staging.SetupView = reinterpret_cast<SetupViewFunc>(base + pEnvironment->FunctionOffsets.SetupView);
-    staging.FindGameObject = reinterpret_cast<FindGameObjectFunc>(base + pEnvironment->FunctionOffsets.FindGameObject);
-    staging.SetActive = reinterpret_cast<SetActiveFunc>(base + pEnvironment->FunctionOffsets.SetActive);
+    staging.SetupQuestBanner = reinterpret_cast<SetupQuestBannerFunc>(base + pEnvironment->FunctionOffsets.SetupQuestBanner);
 }
 
 inline void LogA(const char* format, ...)

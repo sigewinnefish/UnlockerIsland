@@ -88,21 +88,12 @@ static VOID OpenTeamEndpoint()
     }
 }
 
-static VOID SetupViewEndpoint(LPVOID pThis)
+static VOID SetupQuestBannerEndpoint(LPVOID pThis)
 {
     LogA("SetupViewEndpoint called\n");
-    staging.SetupView(pThis);
-    if (pEnvironment->HideQuestBanner)
+    if (!pEnvironment->HideQuestBanner)
     {
-        LogA("Hiding banner\n");
-        Il2CppString* bannerString = staging.MickeyWonderPartner("Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner");
-        LogA("BannerString at 0x%x\n", bannerString);
-        LPVOID banner = staging.FindGameObject(bannerString);
-        if (banner)
-        {
-            LogA("Banner found\n");
-            staging.SetActive(banner, false);
-        }
+        staging.SetupQuestBanner(pThis);
     }
 }
 
@@ -148,9 +139,9 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
         Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
     }
 
-    if (pEnvironment->HookingSetupView)
+    if (pEnvironment->HookingSetupQuestBanner)
     {
-        Detours::Hook(&(LPVOID&)staging.SetupView, SetupViewEndpoint);
+        Detours::Hook(&(LPVOID&)staging.SetupQuestBanner, SetupQuestBannerEndpoint);
     }
 
     if (pEnvironment->HookingSetFieldOfView)
