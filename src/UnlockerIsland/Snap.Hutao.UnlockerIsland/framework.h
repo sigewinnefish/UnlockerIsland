@@ -82,6 +82,8 @@ struct Snap::Hutao::UnlockerIsland::FunctionOffsets
     UINT32 OpenTeamPageAccordingly;
     UINT32 CheckCanEnter;
     UINT32 SetupQuestBanner;
+    UINT32 FindGameObject;
+    UINT32 SetActive;
 };
 
 struct Snap::Hutao::UnlockerIsland::IslandEnvironment
@@ -136,6 +138,8 @@ typedef VOID (*OpenTeamFunc)();
 typedef VOID (*OpenTeamPageAccordinglyFunc)(bool value);
 typedef bool (*CheckCanEnterFunc)();
 typedef VOID (*SetupQuestBannerFunc)(LPVOID this__);
+typedef LPVOID (*FindGameObjectFunc)(Il2CppString* name);
+typedef VOID (*SetActiveFunc)(LPVOID this__, bool value);
 
 struct Snap::Hutao::UnlockerIsland::IslandStaging
 {
@@ -149,6 +153,8 @@ struct Snap::Hutao::UnlockerIsland::IslandStaging
     OpenTeamPageAccordinglyFunc OpenTeamPageAccordingly;
     CheckCanEnterFunc CheckCanEnter;
     SetupQuestBannerFunc SetupQuestBanner;
+    FindGameObjectFunc FindGameObject;
+    SetActiveFunc SetActive;
 };
 
 static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
@@ -170,6 +176,8 @@ static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& 
 
     // Banner functions
     staging.SetupQuestBanner = reinterpret_cast<SetupQuestBannerFunc>(base + pEnvironment->FunctionOffsets.SetupQuestBanner);
+    staging.FindGameObject = reinterpret_cast<FindGameObjectFunc>(base + pEnvironment->FunctionOffsets.FindGameObject);
+    staging.SetActive = reinterpret_cast<SetActiveFunc>(base + pEnvironment->FunctionOffsets.SetActive);
 }
 
 inline void LogA(const char* format, ...)

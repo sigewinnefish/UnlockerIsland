@@ -95,6 +95,18 @@ static VOID SetupQuestBannerEndpoint(LPVOID pThis)
     {
         staging.SetupQuestBanner(pThis);
     }
+    else
+    {
+        LogA("Hiding banner\n");
+        Il2CppString* bannerString = staging.MickeyWonderPartner("Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner");
+        LogA("BannerString at 0x%x\n", bannerString);
+        LPVOID banner = staging.FindGameObject(bannerString);
+        if (banner)
+        {
+            LogA("Banner found\n");
+            staging.SetActive(banner, false);
+        }
+    }
 }
 
 static DWORD WINAPI IslandThread(LPVOID lpParam)
