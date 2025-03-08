@@ -109,6 +109,18 @@ static VOID SetupQuestBannerEndpoint(LPVOID pThis)
     }
 }
 
+static bool EventCameraMoveEndpoint(LPVOID pThis, LPVOID event)
+{
+    if (pEnvironment->DisableEventCameraMove)
+    {
+        return true;
+    }
+    else
+    {
+        return staging.EventCameraMove(pThis, event);
+    }
+}
+
 static DWORD WINAPI IslandThread(LPVOID lpParam)
 {
 #ifdef _DEBUG
@@ -156,6 +168,11 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
         Detours::Hook(&(LPVOID&)staging.SetupQuestBanner, SetupQuestBannerEndpoint);
     }
 
+    if (pEnvironment->HookingEventCameraMove)
+    {
+        Detours::Hook(&(LPVOID&)staging.EventCameraMove, EventCameraMoveEndpoint);
+    }
+
     if (pEnvironment->HookingSetFieldOfView)
     {
         Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
@@ -180,6 +197,7 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
     FreeLibraryAndExitThread(static_cast<HMODULE>(lpParam), 0);
     return 0;
 }
+
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {

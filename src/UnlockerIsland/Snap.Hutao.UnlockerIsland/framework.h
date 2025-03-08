@@ -72,9 +72,9 @@ enum struct Snap::Hutao::UnlockerIsland::IslandState : int
 
 struct Snap::Hutao::UnlockerIsland::FunctionOffsets
 {
-    UINT32 MickeyWonderMethod;
-    UINT32 MickeyWonderMethodPartner;
-    UINT32 MickeyWonderMethodPartner2;
+    UINT32 MickeyWonder;
+    UINT32 MickeyWonderPartner;
+    UINT32 MickeyWonderPartner2;
     UINT32 SetFieldOfView;
     UINT32 SetEnableFogRendering;
     UINT32 SetTargetFrameRate;
@@ -84,6 +84,7 @@ struct Snap::Hutao::UnlockerIsland::FunctionOffsets
     UINT32 SetupQuestBanner;
     UINT32 FindGameObject;
     UINT32 SetActive;
+    UINT32 EventCameraMove;
 };
 
 struct Snap::Hutao::UnlockerIsland::IslandEnvironment
@@ -105,6 +106,8 @@ struct Snap::Hutao::UnlockerIsland::IslandEnvironment
     BOOL HookingMickeyWonderPartner2;
     BOOL HookingSetupQuestBanner;
     BOOL HideQuestBanner;
+    BOOL HookingEventCameraMove;
+    BOOL DisableEventCameraMove;
 };
 
 typedef struct Il2CppObject
@@ -131,53 +134,60 @@ typedef struct Il2CppString
 typedef Il2CppArraySize* (*MickeyWonderMethod)(INT32 value);
 typedef Il2CppString* (*MickeyWonderMethodPartner)(PCSTR value);
 typedef VOID (*MickeyWonderMethodPartner2)(LPVOID mickey, LPVOID house, LPVOID spell);
-typedef VOID (*SetFieldOfViewFunc)(LPVOID this__, FLOAT value);
-typedef VOID (*SetEnableFogRenderingFunc)(bool value);
-typedef VOID (*SetTargetFrameRateFunc)(INT32 value);
-typedef VOID (*OpenTeamFunc)();
-typedef VOID (*OpenTeamPageAccordinglyFunc)(bool value);
-typedef bool (*CheckCanEnterFunc)();
-typedef VOID (*SetupQuestBannerFunc)(LPVOID this__);
-typedef LPVOID (*FindGameObjectFunc)(Il2CppString* name);
-typedef VOID (*SetActiveFunc)(LPVOID this__, bool value);
+typedef VOID (*SetFieldOfViewMethod)(LPVOID this__, FLOAT value);
+typedef VOID (*SetEnableFogRenderingMethod)(bool value);
+typedef VOID (*SetTargetFrameRateMethod)(INT32 value);
+typedef VOID (*OpenTeamMethod)();
+typedef VOID (*OpenTeamPageAccordinglyMethod)(bool value);
+typedef bool (*CheckCanEnterMethod)();
+typedef VOID (*SetupQuestBannerMethod)(LPVOID this__);
+typedef LPVOID (*FindGameObjectMethod)(Il2CppString* name);
+typedef VOID (*SetActiveMethod)(LPVOID this__, bool value);
+typedef bool (*EventCameraMoveMethod)(LPVOID this__, LPVOID event);
 
 struct Snap::Hutao::UnlockerIsland::IslandStaging
 {
     MickeyWonderMethod MickeyWonder;
     MickeyWonderMethodPartner MickeyWonderPartner;
     MickeyWonderMethodPartner2 MickeyWonderPartner2;
-    SetFieldOfViewFunc SetFieldOfView;
-    SetEnableFogRenderingFunc SetEnableFogRendering;
-    SetTargetFrameRateFunc SetTargetFrameRate;
-    OpenTeamFunc OpenTeam;
-    OpenTeamPageAccordinglyFunc OpenTeamPageAccordingly;
-    CheckCanEnterFunc CheckCanEnter;
-    SetupQuestBannerFunc SetupQuestBanner;
-    FindGameObjectFunc FindGameObject;
-    SetActiveFunc SetActive;
+    SetFieldOfViewMethod SetFieldOfView;
+    SetEnableFogRenderingMethod SetEnableFogRendering;
+    SetTargetFrameRateMethod SetTargetFrameRate;
+    OpenTeamMethod OpenTeam;
+    OpenTeamPageAccordinglyMethod OpenTeamPageAccordingly;
+    CheckCanEnterMethod CheckCanEnter;
+    SetupQuestBannerMethod SetupQuestBanner;
+    FindGameObjectMethod FindGameObject;
+    SetActiveMethod SetActive;
+    EventCameraMoveMethod EventCameraMove;
 };
 
 static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
 {
+#define BIND(target, method) target = reinterpret_cast<decltype(target)>(base + pEnvironment->FunctionOffsets.method)
+
     // Magic
-    staging.MickeyWonder = reinterpret_cast<MickeyWonderMethod>(base + pEnvironment->FunctionOffsets.MickeyWonderMethod);
-    staging.MickeyWonderPartner = reinterpret_cast<MickeyWonderMethodPartner>(base + pEnvironment->FunctionOffsets.MickeyWonderMethodPartner);
-    staging.MickeyWonderPartner2 = reinterpret_cast<MickeyWonderMethodPartner2>(base + pEnvironment->FunctionOffsets.MickeyWonderMethodPartner2);
+    BIND(staging.MickeyWonder, MickeyWonder);
+    BIND(staging.MickeyWonderPartner, MickeyWonderPartner);
+    BIND(staging.MickeyWonderPartner2, MickeyWonderPartner2);
 
     // Basic functions
-    staging.SetFieldOfView = reinterpret_cast<SetFieldOfViewFunc>(base + pEnvironment->FunctionOffsets.SetFieldOfView);
-    staging.SetEnableFogRendering = reinterpret_cast<SetEnableFogRenderingFunc>(base + pEnvironment->FunctionOffsets.SetEnableFogRendering);
-    staging.SetTargetFrameRate = reinterpret_cast<SetTargetFrameRateFunc>(base + pEnvironment->FunctionOffsets.SetTargetFrameRate);
+    BIND(staging.SetFieldOfView, SetFieldOfView);
+    BIND(staging.SetEnableFogRendering, SetEnableFogRendering);
+    BIND(staging.SetTargetFrameRate, SetTargetFrameRate);
 
     // Team functions
-    staging.OpenTeam = reinterpret_cast<OpenTeamFunc>(base + pEnvironment->FunctionOffsets.OpenTeam);
-    staging.OpenTeamPageAccordingly = reinterpret_cast<OpenTeamPageAccordinglyFunc>(base + pEnvironment->FunctionOffsets.OpenTeamPageAccordingly);
-    staging.CheckCanEnter = reinterpret_cast<CheckCanEnterFunc>(base + pEnvironment->FunctionOffsets.CheckCanEnter);
+    BIND(staging.OpenTeam, OpenTeam);
+    BIND(staging.OpenTeamPageAccordingly, OpenTeamPageAccordingly);
+    BIND(staging.CheckCanEnter, CheckCanEnter);
 
     // Banner functions
-    staging.SetupQuestBanner = reinterpret_cast<SetupQuestBannerFunc>(base + pEnvironment->FunctionOffsets.SetupQuestBanner);
-    staging.FindGameObject = reinterpret_cast<FindGameObjectFunc>(base + pEnvironment->FunctionOffsets.FindGameObject);
-    staging.SetActive = reinterpret_cast<SetActiveFunc>(base + pEnvironment->FunctionOffsets.SetActive);
+    BIND(staging.SetupQuestBanner, SetupQuestBanner);
+    BIND(staging.FindGameObject, FindGameObject);
+    BIND(staging.SetActive, SetActive);
+
+    // Virtual Camera functions
+    BIND(staging.EventCameraMove, EventCameraMove);
 }
 
 inline void LogA(const char* format, ...)
