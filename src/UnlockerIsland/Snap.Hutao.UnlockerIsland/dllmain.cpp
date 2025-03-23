@@ -6,6 +6,7 @@ using namespace Snap::Hutao::UnlockerIsland;
 
 HANDLE hThread = NULL;
 BOOL bDllExit = FALSE;
+BOOL bTouchScreen = FALSE;
 
 std::string minnie;
 
@@ -54,14 +55,14 @@ static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spe
 
 static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
 {
-    if (!pEnvironment->EnableSetFieldOfView)
-    {
-        return staging.SetFieldOfView(pThis, value);
-    }
-
     if (pEnvironment->EnableSetTargetFrameRate)
     {
         staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
+    }
+
+    if (!pEnvironment->EnableSetFieldOfView)
+    {
+        return staging.SetFieldOfView(pThis, value);
     }
 
     if (std::floor(value) <= 30.0f)
@@ -73,6 +74,20 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
     {
         staging.SetEnableFogRendering(!pEnvironment->DisableFog);
         staging.SetFieldOfView(pThis, pEnvironment->FieldOfView);
+    }
+
+    if (pEnvironment->UsingTouchScreen && !bTouchScreen)
+    {
+        bTouchScreen = TRUE;
+        __try
+        {
+            LogA("Call SwitchInputDeviceToTouchScreen");
+            staging.SwitchInputDeviceToTouchScreen(NULL);
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            LogA("Catch SwitchInputDeviceToTouchScreen");
+        }
     }
 }
 
@@ -121,6 +136,17 @@ static bool EventCameraMoveEndpoint(LPVOID pThis, LPVOID event)
     }
 }
 
+static VOID ShowOneDamageTextExEndpoint(LPVOID pThis, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType)
+{
+    LogA("[Damage]:[type: %d] [damageType: %d] [showType: %d] [damage: %f] [%p] [%p] [%d]\n", type, damageType, showType, damage, worldPos, attackee, elementReactionType);
+    if (pEnvironment->DisableShowDamageText)
+    {
+        return;
+    }
+
+    staging.ShowOneDamageTextEx(pThis, type, damageType, showType, damage, showText, worldPos, attackee, elementReactionType);
+}
+
 static DWORD WINAPI IslandThread(LPVOID lpParam)
 {
 #ifdef _DEBUG
@@ -147,57 +173,26 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
     UINT64 base = (UINT64)GetModuleHandleW(NULL);
     InitializeIslandStaging(staging, base, pEnvironment);
 
-    if (pEnvironment->HookingMickeyWonderPartner2)
+    for (INT32 n = 0; n < 3; n++)
     {
-        for (INT32 n = 0; n < 3; n++)
-        {
-            Il2CppArraySize* const result = staging.MickeyWonder(n);
-            minnie += std::string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
-        }
-
-        Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
+        Il2CppArraySize* const result = staging.MickeyWonder(n);
+        minnie += std::string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
     }
 
-    if (pEnvironment->HookingOpenTeam)
-    {
-        Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
-    }
+    Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
+    Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
+    Detours::Hook(&(LPVOID&)staging.SetupQuestBanner, SetupQuestBannerEndpoint);
+    Detours::Hook(&(LPVOID&)staging.EventCameraMove, EventCameraMoveEndpoint);
+    Detours::Hook(&(LPVOID&)staging.ShowOneDamageTextEx, ShowOneDamageTextExEndpoint);
+    Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
 
-    if (pEnvironment->HookingSetupQuestBanner)
-    {
-        Detours::Hook(&(LPVOID&)staging.SetupQuestBanner, SetupQuestBannerEndpoint);
-    }
-
-    if (pEnvironment->HookingEventCameraMove)
-    {
-        Detours::Hook(&(LPVOID&)staging.EventCameraMove, EventCameraMoveEndpoint);
-    }
-
-    if (pEnvironment->HookingSetFieldOfView)
-    {
-        Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
-        WaitForSingleObject(GetCurrentThread(), INFINITE);
-    }
-    else
-    {
-        while (true)
-        {
-            // Not so meaningful, but we allow the user to change the settings
-            if (pEnvironment->EnableSetTargetFrameRate)
-            {
-                staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
-            }
-
-            Sleep(62);
-        }
-    }
+    WaitForSingleObject(GetCurrentThread(), INFINITE);
 
     pEnvironment->State = IslandState::Stopped;
 
     FreeLibraryAndExitThread(static_cast<HMODULE>(lpParam), 0);
     return 0;
 }
-
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
@@ -259,6 +254,12 @@ static LRESULT WINAPI IslandGetWindowHookImpl(int code, WPARAM wParam, LPARAM lP
 ISLAND_API HRESULT WINAPI IslandGetWindowHook(_Out_ HOOKPROC* pHookProc)
 {
     *pHookProc = IslandGetWindowHookImpl;
+    return S_OK;
+}
+
+ISLAND_API HRESULT WINAPI IslandGetFunctionOffsetsSize(_Out_ UINT64* pCount)
+{
+    *pCount = sizeof(FunctionOffsets);
     return S_OK;
 }
 #pragma endregion

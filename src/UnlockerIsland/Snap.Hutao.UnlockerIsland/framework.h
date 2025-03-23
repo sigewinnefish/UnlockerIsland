@@ -85,6 +85,8 @@ struct Snap::Hutao::UnlockerIsland::FunctionOffsets
     UINT32 FindGameObject;
     UINT32 SetActive;
     UINT32 EventCameraMove;
+    UINT32 ShowOneDamageTextEx;
+    UINT32 SwitchInputDeviceToTouchScreen;
 };
 
 struct Snap::Hutao::UnlockerIsland::IslandEnvironment
@@ -94,20 +96,17 @@ struct Snap::Hutao::UnlockerIsland::IslandEnvironment
 
     FunctionOffsets FunctionOffsets;
 
-    BOOL HookingSetFieldOfView;
     BOOL EnableSetFieldOfView;
     FLOAT FieldOfView;
     BOOL FixLowFovScene;
     BOOL DisableFog;
     BOOL EnableSetTargetFrameRate;
     INT32 TargetFrameRate;
-    BOOL HookingOpenTeam;
     BOOL RemoveOpenTeamProgress;
-    BOOL HookingMickeyWonderPartner2;
-    BOOL HookingSetupQuestBanner;
     BOOL HideQuestBanner;
-    BOOL HookingEventCameraMove;
     BOOL DisableEventCameraMove;
+    BOOL DisableShowDamageText;
+    BOOL UsingTouchScreen;
 };
 
 typedef struct Il2CppObject
@@ -131,6 +130,10 @@ typedef struct Il2CppString
     WCHAR chars[32];
 } Il2CppString;
 
+typedef struct Il2CppExceptionWrapper {
+    LPVOID ex;
+} Il2CppExceptionWrapper;
+
 typedef Il2CppArraySize* (*MickeyWonderMethod)(INT32 value);
 typedef Il2CppString* (*MickeyWonderMethodPartner)(PCSTR value);
 typedef VOID (*MickeyWonderMethodPartner2)(LPVOID mickey, LPVOID house, LPVOID spell);
@@ -144,6 +147,8 @@ typedef VOID (*SetupQuestBannerMethod)(LPVOID this__);
 typedef LPVOID (*FindGameObjectMethod)(Il2CppString* name);
 typedef VOID (*SetActiveMethod)(LPVOID this__, bool value);
 typedef bool (*EventCameraMoveMethod)(LPVOID this__, LPVOID event);
+typedef VOID (*ShowOneDamageTextExMethod)(LPVOID this__, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType);
+typedef VOID (*SwitchInputDeviceToTouchScreenMethod)(LPVOID this__);
 
 struct Snap::Hutao::UnlockerIsland::IslandStaging
 {
@@ -160,6 +165,8 @@ struct Snap::Hutao::UnlockerIsland::IslandStaging
     FindGameObjectMethod FindGameObject;
     SetActiveMethod SetActive;
     EventCameraMoveMethod EventCameraMove;
+    ShowOneDamageTextExMethod ShowOneDamageTextEx;
+    SwitchInputDeviceToTouchScreenMethod SwitchInputDeviceToTouchScreen;
 };
 
 static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
@@ -188,6 +195,12 @@ static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& 
 
     // Virtual Camera functions
     BIND(staging.EventCameraMove, EventCameraMove);
+
+    // Damage text functions
+    BIND(staging.ShowOneDamageTextEx, ShowOneDamageTextEx);
+
+    // Touch screen functions
+    BIND(staging.SwitchInputDeviceToTouchScreen, SwitchInputDeviceToTouchScreen);
 }
 
 inline void LogA(const char* format, ...)
