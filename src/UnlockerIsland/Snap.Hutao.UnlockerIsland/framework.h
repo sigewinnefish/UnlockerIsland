@@ -203,7 +203,7 @@ static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& 
     BIND(staging.SwitchInputDeviceToTouchScreen, SwitchInputDeviceToTouchScreen);
 }
 
-inline void LogA(const char* format, ...)
+inline void LogA(PCSTR format, ...)
 {
 #ifdef _DEBUG
     va_list args;
@@ -213,7 +213,7 @@ inline void LogA(const char* format, ...)
 #endif
 }
 
-inline void LogW(const WCHAR* format, ...)
+inline void LogW(PCWSTR format, ...)
 {
 #ifdef _DEBUG
     va_list args;

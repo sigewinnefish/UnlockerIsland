@@ -1,12 +1,13 @@
 ﻿#include "pch.h"
 #include <string>
 #include <vector>
+#include <mutex>
 
 using namespace Snap::Hutao::UnlockerIsland;
 
 HANDLE hThread = NULL;
 BOOL bDllExit = FALSE;
-BOOL bTouchScreen = FALSE;
+std::once_flag ofTouchScreen;
 
 std::string minnie;
 
@@ -55,6 +56,22 @@ static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spe
 
 static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
 {
+    std::call_once(ofTouchScreen, [&]()
+    {
+        if (pEnvironment->UsingTouchScreen)
+        {
+            __try
+            {
+                LogA("Call SwitchInputDeviceToTouchScreen");
+                staging.SwitchInputDeviceToTouchScreen(NULL);
+            }
+            __except (EXCEPTION_EXECUTE_HANDLER)
+            {
+                LogA("Catch SwitchInputDeviceToTouchScreen");
+            }
+        }
+    });
+
     if (pEnvironment->EnableSetTargetFrameRate)
     {
         staging.SetTargetFrameRate(pEnvironment->TargetFrameRate);
@@ -74,20 +91,6 @@ static VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value)
     {
         staging.SetEnableFogRendering(!pEnvironment->DisableFog);
         staging.SetFieldOfView(pThis, pEnvironment->FieldOfView);
-    }
-
-    if (pEnvironment->UsingTouchScreen && !bTouchScreen)
-    {
-        bTouchScreen = TRUE;
-        __try
-        {
-            LogA("Call SwitchInputDeviceToTouchScreen");
-            staging.SwitchInputDeviceToTouchScreen(NULL);
-        }
-        __except (EXCEPTION_EXECUTE_HANDLER)
-        {
-            LogA("Catch SwitchInputDeviceToTouchScreen");
-        }
     }
 }
 
