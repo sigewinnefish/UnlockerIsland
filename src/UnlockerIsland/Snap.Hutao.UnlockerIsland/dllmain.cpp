@@ -183,11 +183,11 @@ static DWORD WINAPI IslandThread(LPVOID lpParam)
     }
 
     Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
+    Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
     Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
     Detours::Hook(&(LPVOID&)staging.SetupQuestBanner, SetupQuestBannerEndpoint);
     Detours::Hook(&(LPVOID&)staging.EventCameraMove, EventCameraMoveEndpoint);
     Detours::Hook(&(LPVOID&)staging.ShowOneDamageTextEx, ShowOneDamageTextExEndpoint);
-    Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
 
     WaitForSingleObject(GetCurrentThread(), INFINITE);
 

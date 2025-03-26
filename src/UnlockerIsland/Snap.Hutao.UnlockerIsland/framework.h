@@ -169,6 +169,10 @@ struct Snap::Hutao::UnlockerIsland::IslandStaging
     SwitchInputDeviceToTouchScreenMethod SwitchInputDeviceToTouchScreen;
 };
 
+void LogA(PCSTR format, ...);
+
+void LogW(PCWSTR format, ...);
+
 static VOID Snap::Hutao::UnlockerIsland::InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment)
 {
 #define BIND(target, method) target = reinterpret_cast<decltype(target)>(base + pEnvironment->FunctionOffsets.method)
