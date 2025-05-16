@@ -12,7 +12,7 @@ HRESULT IslandGetWindowHook(_Out_ HOOKPROC* pHookProc)
     return S_OK;
 }
 
-HRESULT DllGetWindowHookForHutao(_Out_ HOOKPROC* pHookProc)
+HRESULT DllGetWindowsHookForHutao(_Out_ HOOKPROC* pHookProc)
 {
     *pHookProc = IslandGetWindowHookImpl;
     return S_OK;
