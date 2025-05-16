@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Detours/detours.h"
 #include <map>
+#include "Detours/detours.h"
 
 class Detours
 {
