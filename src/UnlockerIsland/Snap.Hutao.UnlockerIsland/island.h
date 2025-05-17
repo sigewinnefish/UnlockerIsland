@@ -20,6 +20,8 @@ namespace Snap::Hutao::UnlockerIsland
     typedef bool (*EventCameraMoveMethod)(LPVOID this__, LPVOID event);
     typedef VOID(*ShowOneDamageTextExMethod)(LPVOID this__, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType);
     typedef VOID(*SwitchInputDeviceToTouchScreenMethod)(LPVOID this__);
+    typedef VOID(*MickeyWonderCombineEntryMethod)(LPVOID this__);
+    typedef bool(*MickeyWonderCombineEntryMethodPartner)(Il2CppString* name, LPVOID arg2, LPVOID arg3, LPVOID arg4, LPVOID arg5);
 
     enum struct IslandState : int
     {
@@ -46,6 +48,8 @@ namespace Snap::Hutao::UnlockerIsland
         UINT32 EventCameraMove;
         UINT32 ShowOneDamageTextEx;
         UINT32 SwitchInputDeviceToTouchScreen;
+        UINT32 MickeyWonderCombineEntry;
+        UINT32 MickeyWonderCombineEntryPartner;
     };
 
     struct IslandEnvironment
@@ -66,6 +70,7 @@ namespace Snap::Hutao::UnlockerIsland
         BOOL DisableEventCameraMove;
         BOOL DisableShowDamageText;
         BOOL UsingTouchScreen;
+        BOOL RedirectCombineEntry;
     };
 
     struct IslandStaging
@@ -85,6 +90,8 @@ namespace Snap::Hutao::UnlockerIsland
         EventCameraMoveMethod EventCameraMove;
         ShowOneDamageTextExMethod ShowOneDamageTextEx;
         SwitchInputDeviceToTouchScreenMethod SwitchInputDeviceToTouchScreen;
+        MickeyWonderCombineEntryMethod MickeyWonderCombineEntry;
+        MickeyWonderCombineEntryMethodPartner MickeyWonderCombineEntryPartner;
     };
 
     extern DWORD CALLBACK IslandThread(LPVOID lpParam);
@@ -97,4 +104,5 @@ namespace Snap::Hutao::UnlockerIsland
     VOID SetupQuestBannerEndpoint(LPVOID pThis);
     bool EventCameraMoveEndpoint(LPVOID pThis, LPVOID event);
     VOID ShowOneDamageTextExEndpoint(LPVOID pThis, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType);
+    VOID MickeyWonderCombineEntryEndpoint(LPVOID pThis);
 }

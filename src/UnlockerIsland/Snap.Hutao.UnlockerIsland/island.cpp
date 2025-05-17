@@ -42,6 +42,7 @@ namespace Snap::Hutao::UnlockerIsland
         Detours::Hook(&(LPVOID&)staging.SetupQuestBanner, SetupQuestBannerEndpoint);
         Detours::Hook(&(LPVOID&)staging.EventCameraMove, EventCameraMoveEndpoint);
         Detours::Hook(&(LPVOID&)staging.ShowOneDamageTextEx, ShowOneDamageTextExEndpoint);
+        Detours::Hook(&(LPVOID&)staging.MickeyWonderCombineEntry, MickeyWonderCombineEntryEndpoint);
 
         RETURN_LAST_ERROR_IF(WAIT_FAILED == WaitForSingleObject(GetCurrentThread(), INFINITE));
 
@@ -83,6 +84,10 @@ namespace Snap::Hutao::UnlockerIsland
 
         // Touch screen functions
         BIND(staging.SwitchInputDeviceToTouchScreen, SwitchInputDeviceToTouchScreen);
+
+        // Combine functions
+        BIND(staging.MickeyWonderCombineEntry, MickeyWonderCombineEntry);
+        BIND(staging.MickeyWonderCombineEntryPartner, MickeyWonderCombineEntryPartner);
     }
 
     static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spell)
@@ -219,5 +224,16 @@ namespace Snap::Hutao::UnlockerIsland
         }
 
         staging.ShowOneDamageTextEx(pThis, type, damageType, showType, damage, showText, worldPos, attackee, elementReactionType);
+    }
+    
+    static VOID MickeyWonderCombineEntryEndpoint(LPVOID pThis)
+    {
+        if (pEnvironment->RedirectCombineEntry)
+        {
+            staging.MickeyWonderCombineEntryPartner(staging.MickeyWonderPartner("SynthesisPage"), NULL, NULL, NULL, NULL);
+            return;
+        }
+
+        staging.MickeyWonderCombineEntry(pThis);
     }
 }
