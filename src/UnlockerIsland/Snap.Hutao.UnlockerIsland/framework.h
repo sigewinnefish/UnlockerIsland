@@ -13,6 +13,8 @@ constexpr bool ISLAND_FEATURE_HANDLE_DLL_PROCESS_DETACH = true;
 
 constexpr PCWSTR ISLAND_ENVIRONMENT_NAME = L"4F3E8543-40F7-4808-82DC-21E48A6037A7";
 
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+
 static VOID DisableProtectVirtualMemory()
 {
     // ntdll.dll must be loaded

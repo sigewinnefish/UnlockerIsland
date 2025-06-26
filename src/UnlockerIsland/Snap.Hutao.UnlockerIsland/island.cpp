@@ -37,6 +37,7 @@ namespace Snap::Hutao::UnlockerIsland
         }
 
         Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
+        Detours::Hook(&(LPVOID&)staging.GetTargetFrameRate, GetTargetFrameRateEndpoint);
         Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
         Detours::Hook(&(LPVOID&)staging.OpenTeam, OpenTeamEndpoint);
         Detours::Hook(&(LPVOID&)staging.SetupQuestBanner, SetupQuestBannerEndpoint);
@@ -64,6 +65,7 @@ namespace Snap::Hutao::UnlockerIsland
         // Basic functions
         BIND(staging.SetFieldOfView, SetFieldOfView);
         BIND(staging.SetEnableFogRendering, SetEnableFogRendering);
+        BIND(staging.GetTargetFrameRate, GetTargetFrameRate);
         BIND(staging.SetTargetFrameRate, SetTargetFrameRate);
 
         // Team functions
@@ -168,6 +170,11 @@ namespace Snap::Hutao::UnlockerIsland
             staging.SetEnableFogRendering(!pEnvironment->DisableFog);
             staging.SetFieldOfView(pThis, pEnvironment->FieldOfView);
         }
+    }
+
+    static INT32 GetTargetFrameRateEndpoint()
+    {
+        return 0x3C;
     }
 
     static VOID OpenTeamEndpoint()

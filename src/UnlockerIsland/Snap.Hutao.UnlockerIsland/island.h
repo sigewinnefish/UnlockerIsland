@@ -10,6 +10,7 @@ namespace Snap::Hutao::UnlockerIsland
     typedef VOID(*MickeyWonderMethodPartner2)(LPVOID mickey, LPVOID house, LPVOID spell);
     typedef VOID(*SetFieldOfViewMethod)(LPVOID this__, FLOAT value);
     typedef VOID(*SetEnableFogRenderingMethod)(bool value);
+    typedef INT32(*GetTargetFrameRateMethod)();
     typedef VOID(*SetTargetFrameRateMethod)(INT32 value);
     typedef VOID(*OpenTeamMethod)();
     typedef VOID(*OpenTeamPageAccordinglyMethod)(bool value);
@@ -38,6 +39,7 @@ namespace Snap::Hutao::UnlockerIsland
         UINT32 MickeyWonderPartner2;
         UINT32 SetFieldOfView;
         UINT32 SetEnableFogRendering;
+        UINT32 GetTargetFrameRate;
         UINT32 SetTargetFrameRate;
         UINT32 OpenTeam;
         UINT32 OpenTeamPageAccordingly;
@@ -80,6 +82,7 @@ namespace Snap::Hutao::UnlockerIsland
         MickeyWonderMethodPartner2 MickeyWonderPartner2;
         SetFieldOfViewMethod SetFieldOfView;
         SetEnableFogRenderingMethod SetEnableFogRendering;
+        GetTargetFrameRateMethod GetTargetFrameRate;
         SetTargetFrameRateMethod SetTargetFrameRate;
         OpenTeamMethod OpenTeam;
         OpenTeamPageAccordinglyMethod OpenTeamPageAccordingly;
@@ -100,6 +103,7 @@ namespace Snap::Hutao::UnlockerIsland
 
     VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spell);
     VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value);
+    INT32 GetTargetFrameRateEndpoint();
     VOID OpenTeamEndpoint();
     VOID SetupQuestBannerEndpoint(LPVOID pThis);
     bool EventCameraMoveEndpoint(LPVOID pThis, LPVOID event);
