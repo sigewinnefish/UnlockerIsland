@@ -119,20 +119,20 @@ namespace Snap::Hutao::UnlockerIsland
             }
 
             bFound = TRUE;
-            LogA(L"Minnie at 0x%x\n", offset);
+            LogA(L"Minnie at 0x%x\r\n", offset);
             break;
         }
 
         if (!bFound)
         {
-            LogA(L"Minnie not found.\n");
+            LogA(L"Minnie not found.\r\n");
             return staging.MickeyWonderPartner2(mickey, house, spell);
         }
 
-        LogA(L"Current class: %p\n", (*ppCurrent)->object.klass);
-        LogW(L"Current Minnie: %s\n", &(*ppCurrent)->chars[0]);
-        LogA(L"String class: %p\n", pString->object.klass);
-        LogW(L"String Minnie: %s\n", &pString->chars[0]);
+        LogA(L"Current class: %p\r\n", (*ppCurrent)->object.klass);
+        LogW(L"Current Minnie: %s\r\n", &(*ppCurrent)->chars[0]);
+        LogA(L"String class: %p\r\n", pString->object.klass);
+        LogW(L"String Minnie: %s\r\n", &pString->chars[0]);
 
         *ppCurrent = pString;
 
@@ -198,20 +198,20 @@ namespace Snap::Hutao::UnlockerIsland
 
     static VOID SetupQuestBannerEndpoint(LPVOID pThis)
     {
-        LogA(L"SetupViewEndpoint called\n");
+        LogA(L"SetupViewEndpoint called\r\n");
         if (!pEnvironment->HideQuestBanner)
         {
             staging.SetupQuestBanner(pThis);
         }
         else
         {
-            LogA(L"Hiding banner\n");
+            LogA(L"Hiding banner\r\n");
             Il2CppString* bannerString = staging.MickeyWonderPartner("Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner");
-            LogA(L"BannerString at 0x%x\n", bannerString);
+            LogA(L"BannerString at 0x%x\r\n", bannerString);
             LPVOID banner = staging.FindGameObject(bannerString);
             if (banner)
             {
-                LogA(L"Banner found\n");
+                LogA(L"Banner found\r\n");
                 staging.SetActive(banner, false);
             }
         }
@@ -231,7 +231,7 @@ namespace Snap::Hutao::UnlockerIsland
 
     static VOID ShowOneDamageTextExEndpoint(LPVOID pThis, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType)
     {
-        LogA(L"[Damage]:[type: %d] [damageType: %d] [showType: %d] [damage: %f] [%p] [%p] [%d]\n", type, damageType, showType, damage, worldPos, attackee, elementReactionType);
+        LogA(L"[Damage]:[type: %d] [damageType: %d] [showType: %d] [damage: %f] [%p] [%p] [%d]\r\n", type, damageType, showType, damage, worldPos, attackee, elementReactionType);
         if (pEnvironment->DisableShowDamageText)
         {
             return;
