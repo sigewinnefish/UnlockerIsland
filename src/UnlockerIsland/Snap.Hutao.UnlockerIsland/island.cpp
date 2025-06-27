@@ -2,6 +2,7 @@
 #include <cmath>
 #include <mutex>
 #include <string>
+#include "link.h"
 
 namespace Snap::Hutao::UnlockerIsland
 {
@@ -17,6 +18,12 @@ namespace Snap::Hutao::UnlockerIsland
         RETURN_LAST_ERROR_IF(!AllocConsole());
         freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 #endif
+        HANDLE hThread = ::CreateThread(NULL, 0, LogServerProc, NULL, 0, NULL);
+        if (hThread != NULL)
+        {
+            CloseHandle(hThread);
+            hThread = NULL;
+        }
 
         wil::unique_handle hFile(OpenFileMappingW(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, ISLAND_ENVIRONMENT_NAME));
         RETURN_LAST_ERROR_IF_NULL(hFile);
@@ -112,19 +119,19 @@ namespace Snap::Hutao::UnlockerIsland
             }
 
             bFound = TRUE;
-            LogA("Minnie at 0x%x\n", offset);
+            LogA(L"Minnie at 0x%x\n", offset);
             break;
         }
 
         if (!bFound)
         {
-            LogA("Minnie not found.\n");
+            LogA(L"Minnie not found.\n");
             return staging.MickeyWonderPartner2(mickey, house, spell);
         }
 
-        LogA("Current class: %p\n", (*ppCurrent)->object.klass);
+        LogA(L"Current class: %p\n", (*ppCurrent)->object.klass);
         LogW(L"Current Minnie: %s\n", &(*ppCurrent)->chars[0]);
-        LogA("String class: %p\n", pString->object.klass);
+        LogA(L"String class: %p\n", pString->object.klass);
         LogW(L"String Minnie: %s\n", &pString->chars[0]);
 
         *ppCurrent = pString;
@@ -140,12 +147,12 @@ namespace Snap::Hutao::UnlockerIsland
                 {
                     __try
                     {
-                        LogA("Call SwitchInputDeviceToTouchScreen");
+                        LogA(L"Call SwitchInputDeviceToTouchScreen");
                         staging.SwitchInputDeviceToTouchScreen(NULL);
                     }
                     __except (EXCEPTION_EXECUTE_HANDLER)
                     {
-                        LogA("Catch SwitchInputDeviceToTouchScreen");
+                        LogA(L"Catch SwitchInputDeviceToTouchScreen");
                     }
                 }
             });
@@ -191,20 +198,20 @@ namespace Snap::Hutao::UnlockerIsland
 
     static VOID SetupQuestBannerEndpoint(LPVOID pThis)
     {
-        LogA("SetupViewEndpoint called\n");
+        LogA(L"SetupViewEndpoint called\n");
         if (!pEnvironment->HideQuestBanner)
         {
             staging.SetupQuestBanner(pThis);
         }
         else
         {
-            LogA("Hiding banner\n");
+            LogA(L"Hiding banner\n");
             Il2CppString* bannerString = staging.MickeyWonderPartner("Canvas/Pages/InLevelMapPage/GrpMap/GrpPointTips/Layout/QuestBanner");
-            LogA("BannerString at 0x%x\n", bannerString);
+            LogA(L"BannerString at 0x%x\n", bannerString);
             LPVOID banner = staging.FindGameObject(bannerString);
             if (banner)
             {
-                LogA("Banner found\n");
+                LogA(L"Banner found\n");
                 staging.SetActive(banner, false);
             }
         }
@@ -224,7 +231,7 @@ namespace Snap::Hutao::UnlockerIsland
 
     static VOID ShowOneDamageTextExEndpoint(LPVOID pThis, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType)
     {
-        LogA("[Damage]:[type: %d] [damageType: %d] [showType: %d] [damage: %f] [%p] [%p] [%d]\n", type, damageType, showType, damage, worldPos, attackee, elementReactionType);
+        LogA(L"[Damage]:[type: %d] [damageType: %d] [showType: %d] [damage: %f] [%p] [%p] [%d]\n", type, damageType, showType, damage, worldPos, attackee, elementReactionType);
         if (pEnvironment->DisableShowDamageText)
         {
             return;
