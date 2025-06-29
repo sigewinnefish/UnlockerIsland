@@ -232,6 +232,7 @@ namespace Snap::Hutao::UnlockerIsland
     static VOID ShowOneDamageTextExEndpoint(LPVOID pThis, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType)
     {
         LogA(L"[Damage]:[type: %d] [damageType: %d] [showType: %d] [damage: %f] [%p] [%p] [%d]\r\n", type, damageType, showType, damage, worldPos, attackee, elementReactionType);
+        sharedamage(type, damage);
         if (pEnvironment->DisableShowDamageText)
         {
             return;
