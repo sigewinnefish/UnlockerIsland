@@ -16,14 +16,13 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet Packages
-      run: nuget restore src\UnlockerIsland\UnlockerIsland.sln
-
     - name: Build
       run: msbuild src\UnlockerIsland\UnlockerIsland.sln /p:Configuration=Release
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: UnlockerIsland-build
+        path: src\UnlockerIsland\x64\Release\*.dll
 
-    - name: Pack
-      run: nuget pack src\UnlockerIsland\Snap.Hutao.UnlockerIsland\Snap.Hutao.UnlockerIsland.nuspec
 
-    - name: Publish to NuGet
-      run: nuget push *.nupkg ${{ secrets.NUGET_API_KEY }} -src https://api.nuget.org/v3/index.json
