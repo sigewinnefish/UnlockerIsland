@@ -9,12 +9,9 @@
 #define LogW sendlog
 
 inline HANDLE hPipe;
-
 inline TCHAR  chBuf[1024];
-inline BOOL   fSuccess = FALSE;
 inline DWORD  cbRead, cbToWrite, cbWritten, dwMode;
 inline LPCWSTR lpszPipename = L"\\\\.\\pipe\\mfcislandpipe";
-
 inline wchar_t buf[512];
 
 inline void startlogging() {
@@ -40,8 +37,8 @@ inline void sendlog(PCWSTR format, ...)
     vswprintf(buf, 512, format, args);
 
     cbToWrite = (lstrlen(buf) + 1) * sizeof(WCHAR);
-
-    fSuccess = WriteFile(
+    
+    WriteFile(
         hPipe,
         buf,
         cbToWrite,
@@ -66,7 +63,6 @@ struct DamageFromIsland
 {
     float current;
 };
-
 
 struct ElementalDamages
 {
