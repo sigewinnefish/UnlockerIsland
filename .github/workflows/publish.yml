@@ -16,6 +16,9 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
+    - name: Restore NuGet Packages
+      run: nuget restore src\UnlockerIsland\UnlockerIsland.sln
+
     - name: Build
       run: msbuild src\UnlockerIsland\UnlockerIsland.sln /p:Configuration=Release
     
