@@ -135,3 +135,5 @@ void sharedamage(int type ,float damage)
         break;
     }
 }
+
+inline INIT_ONCE InitOnce;

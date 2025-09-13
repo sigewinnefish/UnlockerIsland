@@ -37,12 +37,7 @@ namespace Snap::Hutao::UnlockerIsland
 
         InitializeIslandStaging(staging, (UINT64)GetModuleHandleW(NULL), pEnvironment);
 
-        for (INT32 n = 0; n < 3; n++)
-        {
-            Il2CppArraySize* const result = staging.MickeyWonder(n);
-            minnie += std::string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
-        }
-
+        Detours::Hook(&(LPVOID&)staging.GameManagerAwake, GameManagerAwakeEndpoint);
         Detours::Hook(&(LPVOID&)staging.MickeyWonderPartner2, MickeyWonderPartner2Endpoint);
         Detours::Hook(&(LPVOID&)staging.GetTargetFrameRate, GetTargetFrameRateEndpoint);
         Detours::Hook(&(LPVOID&)staging.SetFieldOfView, SetFieldOfViewEndpoint);
@@ -65,6 +60,7 @@ namespace Snap::Hutao::UnlockerIsland
 #define BIND(target, method) target = reinterpret_cast<decltype(target)>(base + pEnvironment->FunctionOffsets.method)
 
         // Magic
+        BIND(staging.GameManagerAwake, GameManagerAwake);
         BIND(staging.MickeyWonder, MickeyWonder);
         BIND(staging.MickeyWonderPartner, MickeyWonderPartner);
         BIND(staging.MickeyWonderPartner2, MickeyWonderPartner2);
@@ -97,6 +93,29 @@ namespace Snap::Hutao::UnlockerIsland
         // Combine functions
         BIND(staging.MickeyWonderCombineEntry, MickeyWonderCombineEntry);
         BIND(staging.MickeyWonderCombineEntryPartner, MickeyWonderCombineEntryPartner);
+    }
+
+    static void MickeyWonderfunc() {
+        for (INT32 n = 0; n < 3; n++)
+        {
+            Il2CppArraySize* const result = staging.MickeyWonder(n);
+            minnie += std::string(reinterpret_cast<char*>(&result->vector[0]), result->max_length);
+        }
+    }
+
+    static VOID GameManagerAwakeEndpoint()
+    {
+        staging.GameManagerAwake();
+        BOOL fPending;
+        if (!InitOnceBeginInitialize(&InitOnce, 0, &fPending, 0))
+            abort();
+        if (fPending)
+        {
+            MickeyWonderfunc();
+            if (!InitOnceComplete(&InitOnce, 0, 0))
+                abort();
+        }
+
     }
 
     static VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spell)

@@ -5,6 +5,7 @@
 
 namespace Snap::Hutao::UnlockerIsland
 {
+    typedef VOID(*GameManagerAwake)();
     typedef Il2CppArraySize* (*MickeyWonderMethod)(INT32 value);
     typedef Il2CppString* (*MickeyWonderMethodPartner)(PCSTR value);
     typedef VOID(*MickeyWonderMethodPartner2)(LPVOID mickey, LPVOID house, LPVOID spell);
@@ -34,9 +35,13 @@ namespace Snap::Hutao::UnlockerIsland
 
     struct FunctionOffsets
     {
+        UINT32 GameManagerAwake;
         UINT32 MickeyWonder;
         UINT32 MickeyWonderPartner;
         UINT32 MickeyWonderPartner2;
+        //UINT32 OnBundleDownloadCheckFinishNext;
+        //UINT32 GetComponentByName;
+        //UINT32 GetText;
         UINT32 SetFieldOfView;
         UINT32 SetEnableFogRendering;
         UINT32 GetTargetFrameRate;
@@ -53,6 +58,7 @@ namespace Snap::Hutao::UnlockerIsland
         UINT32 MickeyWonderCombineEntry;
         UINT32 MickeyWonderCombineEntryPartner;
     };
+
 
     struct IslandEnvironment
     {
@@ -77,6 +83,7 @@ namespace Snap::Hutao::UnlockerIsland
 
     struct IslandStaging
     {
+        GameManagerAwake GameManagerAwake;
         MickeyWonderMethod MickeyWonder;
         MickeyWonderMethodPartner MickeyWonderPartner;
         MickeyWonderMethodPartner2 MickeyWonderPartner2;
@@ -100,7 +107,7 @@ namespace Snap::Hutao::UnlockerIsland
     extern DWORD CALLBACK IslandThread(LPVOID lpParam);
 
     VOID InitializeIslandStaging(IslandStaging& staging, UINT64 base, IslandEnvironment* pEnvironment);
-
+    VOID GameManagerAwakeEndpoint();
     VOID MickeyWonderPartner2Endpoint(LPVOID mickey, LPVOID house, LPVOID spell);
     VOID SetFieldOfViewEndpoint(LPVOID pThis, FLOAT value);
     INT32 GetTargetFrameRateEndpoint();
