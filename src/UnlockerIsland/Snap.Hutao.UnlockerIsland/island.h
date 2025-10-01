@@ -25,6 +25,9 @@ namespace Snap::Hutao::UnlockerIsland
     typedef VOID(*MickeyWonderCombineEntryMethod)(LPVOID this__);
     typedef bool(*MickeyWonderCombineEntryMethodPartner)(Il2CppString* name, LPVOID arg2, LPVOID arg3, LPVOID arg4, LPVOID arg5);
 
+    typedef VOID(*SetupResinList)(LPVOID this__);
+    typedef VOID(*ResinListAdd)(LPVOID this__, __int64 item);
+
     enum struct IslandState : int
     {
         None = 0,
@@ -57,6 +60,8 @@ namespace Snap::Hutao::UnlockerIsland
         UINT32 SwitchInputDeviceToTouchScreen;
         UINT32 MickeyWonderCombineEntry;
         UINT32 MickeyWonderCombineEntryPartner;
+        UINT32 SetupResinList;
+        UINT32 ResinListAdd;
     };
 
 
@@ -79,6 +84,10 @@ namespace Snap::Hutao::UnlockerIsland
         BOOL DisableShowDamageText;
         BOOL UsingTouchScreen;
         BOOL RedirectCombineEntry;
+        BOOL ResinListItemId000106Allowed; // Original Resin
+		BOOL ResinListItemId000201Allowed; // Primogems
+        BOOL ResinListItemId107009Allowed; // Fragile Resin
+        BOOL ResinListItemId220007Allowed; // Condensed Resin
     };
 
     struct IslandStaging
@@ -102,6 +111,8 @@ namespace Snap::Hutao::UnlockerIsland
         SwitchInputDeviceToTouchScreenMethod SwitchInputDeviceToTouchScreen;
         MickeyWonderCombineEntryMethod MickeyWonderCombineEntry;
         MickeyWonderCombineEntryMethodPartner MickeyWonderCombineEntryPartner;
+		SetupResinList SetupResinList;
+        ResinListAdd ResinListAdd;
     };
 
     extern DWORD CALLBACK IslandThread(LPVOID lpParam);
@@ -116,4 +127,7 @@ namespace Snap::Hutao::UnlockerIsland
     bool EventCameraMoveEndpoint(LPVOID pThis, LPVOID event);
     VOID ShowOneDamageTextExEndpoint(LPVOID pThis, int type, int damageType, int showType, float damage, Il2CppString* showText, LPVOID worldPos, LPVOID attackee, int elementReactionType);
     VOID MickeyWonderCombineEntryEndpoint(LPVOID pThis);
+    VOID SetupResinListEntryEndpoint(LPVOID pThis);
+    VOID ResinListAddEntryEndpoint(LPVOID pThis, __int64 item);
+
 }

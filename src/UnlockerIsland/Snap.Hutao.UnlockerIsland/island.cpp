@@ -3,6 +3,7 @@
 #include <mutex>
 #include <string>
 #include "link.h"
+#include "defs.h"
 
 namespace Snap::Hutao::UnlockerIsland
 {
@@ -46,6 +47,7 @@ namespace Snap::Hutao::UnlockerIsland
         Detours::Hook(&(LPVOID&)staging.EventCameraMove, EventCameraMoveEndpoint);
         Detours::Hook(&(LPVOID&)staging.ShowOneDamageTextEx, ShowOneDamageTextExEndpoint);
         Detours::Hook(&(LPVOID&)staging.MickeyWonderCombineEntry, MickeyWonderCombineEntryEndpoint);
+        Detours::Hook(&(LPVOID&)staging.SetupResinList, SetupResinListEntryEndpoint);
 
         RETURN_LAST_ERROR_IF(WAIT_FAILED == WaitForSingleObject(GetCurrentThread(), INFINITE));
 
@@ -93,6 +95,10 @@ namespace Snap::Hutao::UnlockerIsland
         // Combine functions
         BIND(staging.MickeyWonderCombineEntry, MickeyWonderCombineEntry);
         BIND(staging.MickeyWonderCombineEntryPartner, MickeyWonderCombineEntryPartner);
+
+        // SetupResinList
+        BIND(staging.SetupResinList, SetupResinList);
+        BIND(staging.ResinListAdd, ResinListAdd);
     }
 
     static void MickeyWonderfunc() {
@@ -270,4 +276,32 @@ namespace Snap::Hutao::UnlockerIsland
 
         staging.MickeyWonderCombineEntry(pThis);
     }
+
+
+    static VOID ResinListAddEntryEndpoint(LPVOID pThis, __int64 item)
+    {
+        if ((HIDWORD(item) != 106 && LODWORD(item) != 106 || pEnvironment->ResinListItemId000106Allowed)
+            && (HIDWORD(item) != 201 && LODWORD(item) != 201 || pEnvironment->ResinListItemId000201Allowed)
+            && (HIDWORD(item) != 107009 && LODWORD(item) != 107009 || pEnvironment->ResinListItemId107009Allowed)
+            && (HIDWORD(item) != 220007 && LODWORD(item) != 220007 || pEnvironment->ResinListItemId220007Allowed))
+        {
+            staging.ResinListAdd(pThis, item);
+        }
+    }
+
+    static VOID SetupResinListEntryEndpoint(LPVOID pThis)
+    {
+        
+        DetourTransactionBegin();
+        DetourUpdateThread(GetCurrentThread());
+        DetourAttach(&(LPVOID&)staging.ResinListAdd, ResinListAddEntryEndpoint);
+        DetourTransactionCommit();
+        staging.SetupResinList(pThis);
+        DetourTransactionBegin();
+        DetourUpdateThread(GetCurrentThread());
+        DetourDetach(&(LPVOID&)staging.ResinListAdd, ResinListAddEntryEndpoint);
+        DetourTransactionCommit();
+    }
+
+
 }
